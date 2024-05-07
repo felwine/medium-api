@@ -1,4 +1,3 @@
-
 export default `
               query UserStreamOverview($userId: ID!, $pagingOptions: PagingOptions) {
                 user(username: $userId) {
