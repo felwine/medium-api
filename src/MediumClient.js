@@ -74,6 +74,7 @@ export default class MediumClient {
     publishedAt,
     publishStatus = "draft",
     contentFormat = "markdown",
+    notifyFollowers = true
   }) {
     // If `user id` is not provided, use the current user.
     if (!userId) ({ id: userId } = await this.getUser())
@@ -88,6 +89,7 @@ export default class MediumClient {
       tags,
       title,
       userId,
+      notifyFollowers
     })
   }
 
@@ -113,6 +115,7 @@ export default class MediumClient {
         publishStatus: options.publishStatus,
         tags: options.tags,
         title: options.title,
+        notifyFollowers: options.notifyFollowers
       },
     })
   }
