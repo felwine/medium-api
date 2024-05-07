@@ -1,24 +1,12 @@
-// Copyright 2015 A Medium Corporation
-// Copyright 2024 Ritvik Nag
+import MediumError from "./MediumError.js"
+import graphqlQuery from './graphqlQuery.js'
+import graphqlQueryMin from './graphqlQueryMin.js'
 
 const DEFAULT_ERROR_CODE = -1
 const DEFAULT_TIMEOUT_MS = 5000
+const PAGE_LIMIT = 25
 
-/**
- * An error with a code.
- */
-class MediumError extends Error {
-  code = null
-  constructor(message, code) {
-    super(message);
-    this.code = code;
-  }
-}
-
-/**
- * The core client.
- */
-class MediumClient {
+export default class MediumClient {
 
   _accessToken = null
 
@@ -279,7 +267,7 @@ class MediumClient {
       variables: {
         userId: username,
         pagingOptions: {
-          limit: pageLimit,
+          limit: PAGE_LIMIT,
           page: null,
           source: null,
           to: page ? String(page) : String(Date.now()),
@@ -321,7 +309,7 @@ class MediumClient {
 
     // noinspection JSUnresolvedReference
     const next =
-      posts.length === pageLimit
+      posts.length === PAGE_LIMIT
         ? resp_data.data.user.profileStreamConnection
           .pagingInfo.next.to
         : null;
@@ -340,7 +328,7 @@ class MediumClient {
       variables: {
         userId: username,
         pagingOptions: {
-          limit: pageLimit,
+          limit: PAGE_LIMIT,
           to: page ? String(page) : String(Date.now()),
         },
       },
@@ -369,7 +357,7 @@ class MediumClient {
 
     // noinspection JSUnresolvedReference
     const next =
-      posts.length === pageLimit
+      posts.length === PAGE_LIMIT
         ? resp_data.data.user.profileStreamConnection
           .pagingInfo.next.to
         : null
@@ -381,108 +369,3 @@ class MediumClient {
   }
 }
 
-const graphqlQuery = `
-              query UserStreamOverview($userId: ID!, $pagingOptions: PagingOptions) {
-                user(username: $userId) {
-                name
-    profileStreamConnection(paging: $pagingOptions) {
-                ...commonStreamConnection
-      __typename
-    }
-              __typename
-  }
-}
-              fragment commonStreamConnection on StreamConnection {
-                pagingInfo {
-                next {
-                limit
-      page
-              source
-              to
-              ignoredIds
-              __typename
-    }
-              __typename
-  }
-              stream {
-                ...StreamItemList_streamItem
-    __typename
-  }
-              __typename
-}
-              fragment StreamItemList_streamItem on StreamItem {
-                ...StreamItem_streamItem
-  __typename
-}
-              fragment StreamItem_streamItem on StreamItem {
-                itemType {
-                __typename
-    ... on StreamItemPostPreview {
-                post {
-                id
-            mediumUrl
-              title
-              firstPublishedAt
-              tags {
-                id
-              }
-              __typename
-        }
-              __typename
-    }
-  }
-              __typename
-}
-              `;
-
-const graphqlQueryMin = `
-              query UserStreamOverview($userId: ID!, $pagingOptions: PagingOptions) {
-                user(username: $userId) {
-                profileStreamConnection(paging: $pagingOptions) {
-                ...commonStreamConnection
-      __typename
-    }
-              __typename
-  }
-}
-              fragment commonStreamConnection on StreamConnection {
-                pagingInfo {
-                next {
-                limit
-      to
-              __typename
-    }
-              __typename
-  }
-              stream {
-                ...StreamItemList_streamItem
-    __typename
-  }
-              __typename
-}
-              fragment StreamItemList_streamItem on StreamItem {
-                ...StreamItem_streamItem
-  __typename
-}
-              fragment StreamItem_streamItem on StreamItem {
-                itemType {
-                __typename
-    ... on StreamItemPostPreview {
-                post {
-                title
-            __typename
-        }
-              __typename
-    }
-  }
-              __typename
-}
-              `;
-
-const pageLimit = 25
-
-// Exports
-export {
-  MediumClient,
-  MediumError,
-}
